@@ -1,31 +1,3 @@
-from flask import Flask
-from flask import render_template
-app = Flask(__name__)
-
-
-@app.route('/')
-def index():
-    return render_template("/index.html")
-
-@app.route('/contactus')
-def contactus():
-    return render_template("/contactus.html")
-
-@app.route('/manufacturing')
-def manufacturing():
-    return render_template("/manufacturing.html")
-
-@app.route('/products')
-def products():
-    return render_template("/products.html")
-
-@app.route('/profile')
-def profile():
-    return render_template("/profile.html")
-
-@app.route('/quality-assurance')
-def quality():
-    return render_template("/quality-assurance.html")
 @app.route("/sitemap")
 @app.route("/sitemap/")
 @app.route("/sitemap.xml")
@@ -62,15 +34,8 @@ def sitemap():
             }
         dynamic_urls.append(url)
 
-    xml_sitemap = render_template("sitemap.xml", static_urls=static_urls, dynamic_urls=dynamic_urls, host_base=host_base)
+    xml_sitemap = render_template("public/sitemap.xml", static_urls=static_urls, dynamic_urls=dynamic_urls, host_base=host_base)
     response = make_response(xml_sitemap)
     response.headers["Content-Type"] = "application/xml"
 
     return response
-
-
-
-
-
-if __name__ == '__main__':
-    app.run()
