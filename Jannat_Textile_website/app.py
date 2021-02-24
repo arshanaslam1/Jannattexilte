@@ -1,5 +1,9 @@
 from flask import Flask
 from flask import render_template
+from datetime import date, datetime, timedelta
+from flask import make_response, request
+from urllib.parse import urlparse
+
 app = Flask(__name__)
 
 
@@ -26,48 +30,37 @@ def profile():
 @app.route('/quality-assurance')
 def quality():
     return render_template("/quality-assurance.html")
-@app.route("/sitemap")
-@app.route("/sitemap/")
-@app.route("/sitemap.xml")
+
+
+@app.route('/sitemap.xml', methods=['GET'])
 def sitemap():
-    """
-        Route to dynamically generate a sitemap of your website/application.
-        lastmod and priority tags omitted on static pages.
-        lastmod included on dynamic content such as blog posts.
-    """
-    from flask import make_response, request, render_template
-    import datetime
-    from urllib.parse import urlparse
 
     host_components = urlparse(request.host_url)
     host_base = host_components.scheme + "://" + host_components.netloc
+    lastmod = date.today() - timedelta(5)
+    lastmod = lastmod.strftime('%Y-%m-%d')
 
     # Static routes with static content
     static_urls = list()
+    
     for rule in app.url_map.iter_rules():
         if not str(rule).startswith("/admin") and not str(rule).startswith("/user"):
             if "GET" in rule.methods and len(rule.arguments) == 0:
                 url = {
                     "loc": f"{host_base}{str(rule)}"
                 }
+               
                 static_urls.append(url)
+                
+                
 
-    # Dynamic routes with dynamic content
-    dynamic_urls = list()
-    blog_posts = Post.objects(published=True)
-    for post in blog_posts:
-        url = {
-            "loc": f"{host_base}/blog/{post.category.name}/{post.url}",
-            "lastmod": post.date_published.strftime("%Y-%m-%dT%H:%M:%SZ")
-            }
-        dynamic_urls.append(url)
-
-    xml_sitemap = render_template("sitemap.xml", static_urls=static_urls, dynamic_urls=dynamic_urls, host_base=host_base)
+    
+    print (static_urls)
+    xml_sitemap = render_template("sitemap.xml", static_urls=static_urls, host_base=host_base, lastmod = lastmod)
     response = make_response(xml_sitemap)
     response.headers["Content-Type"] = "application/xml"
 
     return response
-
 
 
 
